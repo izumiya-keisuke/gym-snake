@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-snake"
-version = "1.0.0"
+version = "1.0.1"
 description = "OpenAI Gym Environment for Snake Game"
 authors = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
 maintainers = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
@@ -19,3 +19,18 @@ numpy = "^1.20.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+)/
+'''
+
+[tool.pylint.FORMAT]
+max-line-length = 100

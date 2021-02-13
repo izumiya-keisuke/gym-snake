@@ -16,7 +16,7 @@ limitations under the License.
 
 from gym.envs.registration import register  # pylint: disable=E0401
 
-from .envs.enum import Direction
+from .enum import Direction
 
 
 register(id="snake-v0", entry_point="gym_snake.envs:SnakeEnvV0")

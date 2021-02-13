@@ -15,13 +15,13 @@ limitations under the License.
 """
 
 import random as rnd
-from copy import deepcopy
 
 import gym  # pylint: disable=E0401
 import numpy as np  # pylint: disable=E0401
 
-from .enum import Cell, Direction
-from .utils import CELL_TO_CHAR_DICT
+from gym_snake.alt_set import AltSet
+from gym_snake.enum import Cell, Direction
+from gym_snake.utils import CELL_TO_CHAR_DICT
 
 
 class SnakeEnvV0(gym.Env):
@@ -76,18 +76,17 @@ class SnakeEnvV0(gym.Env):
         self._init_cells = np.full(cells_shape, Cell.WALL, dtype=np.uint8)
         self._init_cells[1:-1, 1:-1] = np.full(obs_shape, Cell.FLOOR)
         self._init_directions = np.full(cells_shape, Direction.UP, dtype=np.uint8)
-        self._init_floor_poses = {
+        self._init_floor_poses = AltSet(
             (y, x) for x in range(1, width + 1) for y in range(1, height + 1)
-        }
+        )
 
     def _set_food(self):
         # if floor does not exist (game clear), return 1
-        if not self._floor_poses:
+        if self._floor_poses.empty():
             return 1
 
-        y, x = rnd.choice(self._floor_poses)
+        y, x = self._floor_poses.pop()
         self._cells[y, x] = Cell.FOOD
-        self._floor_poses.remove((y, x))
 
         return 0
 
@@ -98,10 +97,10 @@ class SnakeEnvV0(gym.Env):
         # initialize cells, directions and floor-positions
         self._cells = self._init_cells.copy()
         self._directions = self._init_directions.copy()
-        self._floor_poses = deepcopy(self._init_floor_poses)
+        self._floor_poses = self._init_floor_poses.copy()
 
         # set snake, directions and floor-positions
-        direction = rnd.choice(Direction)
+        direction = rnd.choice(list(Direction))
         if direction == Direction.UP:
             head_x = rnd.randint(1, self._width)
             tail_x = head_x
@@ -118,8 +117,8 @@ class SnakeEnvV0(gym.Env):
             tail_y = rnd.randint(1, self._height - self._initial_length + 1)
             head_y = tail_y + self._initial_length - 1
 
-            self._cells[tail_y + 1 : head_y + 1, head_x] = Cell.BODY
-            self._directions[tail_y + 1 : head_y + 1, head_x] = direction
+            self._cells[tail_y:head_y, head_x] = Cell.BODY
+            self._directions[tail_y:head_y, head_x] = direction
             for y in range(tail_y, head_y + 1):
                 self._floor_poses.remove((y, head_x))
         elif direction == Direction.LEFT:
@@ -138,15 +137,15 @@ class SnakeEnvV0(gym.Env):
             head_y = rnd.randint(1, self._height)
             tail_y = head_y
 
-            self._cells[head_y, tail_x + 1 : head_x + 1] = Cell.BODY
-            self._directions[head_y, tail_x + 1 : head_x + 1] = direction
+            self._cells[head_y, tail_x:head_x] = Cell.BODY
+            self._directions[head_y, tail_x:head_x] = direction
             for x in range(tail_x, head_x + 1):
                 self._floor_poses.remove((head_y, x))
         self._head_pos = (head_y, head_x)
         self._tail_pos = (tail_y, tail_x)
         self._cells[head_y, head_x] = Cell.HEAD
 
-        self._set_food()
+        assert self._set_food() == 0
 
         return self._cells[1:-1, 1:-1].copy()
 
@@ -173,26 +172,28 @@ class SnakeEnvV0(gym.Env):
         diff_y, diff_x = self._diffs[action]
         new_head_y = old_head_y + diff_y
         new_head_x = old_head_x + diff_x
+        eaten_cell = self._cells[new_head_y, new_head_x]
         new_head_pos = (new_head_y, new_head_x)
         self._head_pos = new_head_pos
         self._cells[new_head_y, new_head_x] = Cell.HEAD
         self._floor_poses.discard(new_head_pos)
 
         # calc reward, done
-        eaten_cell = self._cells[new_head_y, new_head_x]
         if eaten_cell == Cell.FLOOR or old_tail_pos == new_head_pos:
             reward = 0.0
             done = False
         elif eaten_cell in (Cell.BODY, Cell.WALL):  # game over
             reward = -1.0
             done = True
-        else:  # eaten_cell == Cell.FOOD
+        elif eaten_cell == Cell.FOOD:
             reward = 1.0
             self._cells[old_tail_y, old_tail_x] = Cell.BODY
             self._tail_pos = old_tail_pos
             self._floor_poses.remove(old_tail_pos)
 
             done = self._set_food() == 1
+        else:  # eaten_cell == Cell.HEAD
+            raise ValueError("Impossible path (maybe bug).")
 
         self._step += 1
         if self._step >= self._max_step:
