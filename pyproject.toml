@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "gym-snake"
+version = "1.0.0"
+description = "OpenAI Gym Environment for Snake Game"
+authors = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
+maintainers = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
+license = "Apache-2.0"
+
+readme = "README.rst"
+
+repository = "https://github.com/izumiya-keisuke/gym-snake"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+gym = "^0.18.0"
+numpy = "^1.20.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
