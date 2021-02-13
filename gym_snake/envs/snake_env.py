@@ -222,3 +222,7 @@ class SnakeEnvV0(gym.Env):
             print(str_)
         else:  # mode == 'ansi'
             return str_
+
+    def seed(self, seed=None):
+        self.rng, seed = gym.utils.seeding.np_random(seed)
+        return [seed]

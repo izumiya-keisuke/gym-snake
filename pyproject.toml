@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-snake"
-version = "1.0.1"
+version = "1.1.0"
 description = "OpenAI Gym Environment for Snake Game"
 authors = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
 maintainers = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
