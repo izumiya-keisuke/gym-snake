@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-snake"
-version = "1.2.0"
+version = "1.2.1"
 description = "OpenAI Gym Environment for Snake Game"
 authors = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
 maintainers = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
@@ -17,7 +17,7 @@ gym = "^0.18.0"
 numpy = "^1.20.1"
 
 [tool.poetry.scripts]
-play = "gym_snake.play:main"
+snake-play = "gym_snake.play:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
